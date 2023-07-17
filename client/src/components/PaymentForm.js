@@ -67,16 +67,21 @@ const PaymentForm = () => {
                         console.log("requires_action", successRes.data.paymentIntentId);
                         const hookStatus = await axios.post('http://localhost:4000/webhook');
                         console.log('hookStatus', hookStatus);
-                        if(hookStatus.data.success){
-                            console.log("payment successfull");
+                        if(hookStatus.data.success==='undefined'){
+                            const hookStatus2 = await axios.post('http://localhost:4000/webhook')
+                            console.log("payment redirected");
+                            if(hookStatus2.data.success==='success'){
+                                setSuccess(true);
+                            }else{
+                                console.log('payment_failed2');
+                            }
+                        }else if(hookStatus.data.success==='success'){
+                            console.log('payment_successfull');
                             setSuccess(true);
-                        }else{
-                            console.log('payment_failed')
                         }
                     }
-
                 } else if (response.data.success) {
-                    console.log("payment_successfull");
+                    console.log("payment_successfull_No3D_Secure");
                     setSuccess(true);
                 } else {
                     console.log("payment failed !!!");

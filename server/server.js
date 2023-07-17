@@ -61,6 +61,8 @@ app.post('/complete-payment', async (req, res) => {
     }
 });
 
+
+
 app.post('/webhook', express.raw({ type: 'application/json' }), (request, response) => {
     const event = request.body;
     let status;
@@ -69,7 +71,10 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (request, respon
         case 'payment_intent.succeeded':
             const paymentIntent = event.data.object;
             status = 'success';
-            break;
+            return response.status(200).json({
+                success: 'success',
+                message: "payment successful",
+            });
         case 'payment_method.attached':
             const paymentMethod = event.data.object;
             status = paymentMethod.status;
@@ -81,6 +86,11 @@ app.post('/webhook', express.raw({ type: 'application/json' }), (request, respon
             status = 'success';
             console.log(chargeSucceeded, "charge succeeded");
             break;
+        case 'undefined' : 
+            console.log('undefined came ');
+            return res.status(200).json({
+                success:'undefined'
+            });
         default:
             console.log(`Unhandled event type ${event.type}`);
     }
