@@ -61,9 +61,6 @@ app.post('/complete-payment', async (req, res) => {
     }
 });
 
-
-const endpointSecret = 'whsec_475209d9fdf75901c1c42c6be71a4296701075e4c3cf268b3302fbec3fc0501e';
-
 app.post('/webhook', express.raw({ type: 'application/json' }), (request, response) => {
     const event = request.body;
     let status;
