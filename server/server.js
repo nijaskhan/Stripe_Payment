@@ -7,8 +7,8 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const PORT = process.env.PORT || 4000;
 
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
+// app.use(express.json());
 
 app.use(cors());
 
@@ -18,7 +18,7 @@ app.get('/test', (req, res) => {
     });
 });
 
-app.post('/payment', cors(), async (req, res) => {
+app.post('/payment', express.json(), cors(), async (req, res) => {
     try {
         const { amount, id } = req.body;
         const payment = await stripe.paymentIntents.create({
@@ -48,7 +48,7 @@ app.post('/payment', cors(), async (req, res) => {
 });
 
 
-app.post('/complete-payment', async (req, res) => {
+app.post('/complete-payment', express.json(), async (req, res) => {
     try {
         console.log("complete-pyament route reached", req.body);
         const { paymentIntentId } = req.body;
@@ -63,45 +63,45 @@ app.post('/complete-payment', async (req, res) => {
 
 
 
-app.post('/webhook', express.raw({ type: 'application/json' }), (request, response) => {
+app.post('/webhook', express.json(), (request, response) => {
+    // const event = request.body;
+    const rawBody = request.body.toString('utf8');
     const event = request.body;
+    console.log(event, "event");
     let status;
-    // Handle the event
     switch (event.type) {
-        case 'payment_intent.succeeded':
-            const paymentIntent = event.data.object;
-            status = 'success';
-            return response.status(200).json({
-                success: 'success',
-                message: "payment successful",
-            });
         case 'payment_method.attached':
             const paymentMethod = event.data.object;
-            status = paymentMethod.status;
+            status = 'payment_method.attached';
             console.log('PaymentMethod was attached to a Customer!');
             break;
-        // ... handle other event types
         case 'charge.succeeded':
             const chargeSucceeded = event.data.object;
-            status = 'success';
+            status = 'chargeSucceeded';
             console.log(chargeSucceeded, "charge succeeded");
             break;
-        case 'undefined' : 
-            console.log('undefined came ');
-            return res.status(200).json({
-                success:'undefined'
-            });
+        case 'payment_intent.succeeded':
+            const paymentIntent = event.data.object;
+            status = 'payment_intent.succeeded';
+            console.log("paymentIntent");
+            return response.status(200).json({
+                success: true,
+                message: "paymentIntent"
+            })
+            break;
         default:
             console.log(`Unhandled event type ${event.type}`);
+            return response.status(400).json({
+                success: false,
+                message: `Unhandled event type ${event.type}`
+            });
     }
     // Return a 200 response to acknowledge receipt of the event
     response.status(200).json({
-        success: 'success',
-        message: "payment successful",
+        success: true,
+        message: 'payment successfull'
     });
 });
-
-
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
