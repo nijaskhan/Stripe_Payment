@@ -59,11 +59,21 @@ const PaymentForm = () => {
                     const successRes = await axios.post('http://localhost:4000/complete-payment', {
                         paymentIntentId: response.data.paymentIntentId
                     });
-                    if (successRes.data.success) {
+                    if (successRes.data.paymentIntent.status==='success') {
                         console.log("success", successRes.data.paymentIntentId)
                         setSuccess(true);
                     }
-                    else throw new Error('payment failed');
+                    else if(successRes.data.paymentIntent.status==='requires_action'){
+                        console.log("requires_action", successRes.data.paymentIntentId);
+                        const hookStatus = await axios.post('http://localhost:4000/webhook');
+                        console.log('hookStatus', hookStatus);
+                        if(hookStatus.data.success){
+                            console.log("payment successfull");
+                            setSuccess(true);
+                        }else{
+                            console.log('payment_failed')
+                        }
+                    }
 
                 } else if (response.data.success) {
                     console.log("payment_successfull");

@@ -53,14 +53,48 @@ app.post('/complete-payment', async (req, res) => {
         console.log("complete-pyament route reached", req.body);
         const { paymentIntentId } = req.body;
         const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId);
-
         console.log("payment success purchased success: ", paymentIntent)
-        return res.json({ success: true, paymentIntentId: paymentIntent.id });
+        return res.json({ success: true, paymentIntentId: paymentIntent.id, paymentIntent });
     } catch (err) {
         console.error('Error confirming payment intent:', err);
         return res.status(500).json({ error: err.message });
     }
 });
+
+
+const endpointSecret = 'whsec_475209d9fdf75901c1c42c6be71a4296701075e4c3cf268b3302fbec3fc0501e';
+
+app.post('/webhook', express.raw({ type: 'application/json' }), (request, response) => {
+    const event = request.body;
+    let status;
+    // Handle the event
+    switch (event.type) {
+        case 'payment_intent.succeeded':
+            const paymentIntent = event.data.object;
+            status = 'success';
+            break;
+        case 'payment_method.attached':
+            const paymentMethod = event.data.object;
+            status = paymentMethod.status;
+            console.log('PaymentMethod was attached to a Customer!');
+            break;
+        // ... handle other event types
+        case 'charge.succeeded':
+            const chargeSucceeded = event.data.object;
+            status = 'success';
+            console.log(chargeSucceeded, "charge succeeded");
+            break;
+        default:
+            console.log(`Unhandled event type ${event.type}`);
+    }
+    // Return a 200 response to acknowledge receipt of the event
+    response.status(200).json({
+        success: 'success',
+        message: "payment successful",
+    });
+});
+
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
