@@ -1,0 +1,67 @@
+{
+    "id": "evt_3NV80VSCxJ4SzifX1lB6IJzM",
+    "object": "event",
+    "api_version": "2022-11-15",
+    "created": 1689664062,
+    "data": {
+        "object": {
+            "id": "pi_3NV80VSCxJ4SzifX1ZlLjCvP",
+            "object": "payment_intent",
+            "amount": 1000,
+            "amount_capturable": 0,
+            "amount_details": {
+                "tip": {}
+            },
+            "amount_received": 1000,
+            "application": null,
+            "application_fee_amount": null,
+            "automatic_payment_methods": null,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_3NV80VSCxJ4SzifX1ZlLjCvP_secret_ipQ2l3OPbC3I41MH7KxNbYVG5",
+            "confirmation_method": "automatic",
+            "created": 1689664059,
+            "currency": "inr",
+            "customer": null,
+            "description": "tech_company",
+            "invoice": null,
+            "last_payment_error": null,
+            "latest_charge": "ch_3NV80VSCxJ4SzifX14IkRE62",
+            "livemode": false,
+            "metadata": {},
+            "next_action": null,
+            "on_behalf_of": null,
+            "payment_method": "pm_1NV80USCxJ4SzifXZnf1Ga4w",
+            "payment_method_options": {
+                "card": {
+                    "installments": null,
+                    "mandate_options": null,
+                    "network": null,
+                    "request_three_d_secure": "automatic"
+                }
+            },
+            "payment_method_types": [
+                "card"
+            ],
+            "processing": null,
+            "receipt_email": null,
+            "review": null,
+            "setup_future_usage": "off_session",
+            "shipping": null,
+            "source": null,
+            "statement_descriptor": null,
+            "statement_descriptor_suffix": null,
+            "status": "succeeded",
+            "transfer_data": null,
+            "transfer_group": null
+        }
+    },
+    "livemode": false,
+    "pending_webhooks": 3,
+    "request": {
+        "id": null,
+        "idempotency_key": "pi_3NV80VSCxJ4SzifX1ZlLjCvP-src_1NV80WSCxJ4SzifX8USW0jj9"
+    },
+    "type": "payment_intent.succeeded"
+}

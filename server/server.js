@@ -1,11 +1,11 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const fs = require('fs');
 require('dotenv').config();
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const PORT = process.env.PORT || 4000;
-
 
 // app.use(express.urlencoded({ extended: true }));
 // app.use(express.json());
@@ -47,13 +47,17 @@ app.post('/payment', express.json(), cors(), async (req, res) => {
     }
 });
 
-
+// let paymentObject=[];
 app.post('/complete-payment', express.json(), async (req, res) => {
     try {
         console.log("complete-pyament route reached", req.body);
         const { paymentIntentId } = req.body;
         const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId);
         console.log("payment success purchased success: ", paymentIntent)
+        // paymentObject.push({
+        //     paymentId: paymentIntent.id,
+        //     payment: false
+        // })
         return res.json({ success: true, paymentIntentId: paymentIntent.id, paymentIntent });
     } catch (err) {
         console.error('Error confirming payment intent:', err);
@@ -61,45 +65,41 @@ app.post('/complete-payment', express.json(), async (req, res) => {
     }
 });
 
-
-
-app.post('/webhook', express.json(), (request, response) => {
+// add condition for checking if the event.type is paymentIntent.succeeded
+let paymentSuccess=false;
+app.post('/webhook', express.raw({ type: 'application/json' }), (request, response) => {
     // const event = request.body;
-    const rawBody = request.body.toString('utf8');
-    const event = request.body;
+    console.log(request.body , 'req');
+    const event = JSON.parse(request.body.toString('utf8'));
     console.log(event, "event");
-    let status;
-    switch (event.type) {
-        case 'payment_method.attached':
-            const paymentMethod = event.data.object;
-            status = 'payment_method.attached';
-            console.log('PaymentMethod was attached to a Customer!');
-            break;
-        case 'charge.succeeded':
-            const chargeSucceeded = event.data.object;
-            status = 'chargeSucceeded';
-            console.log(chargeSucceeded, "charge succeeded");
-            break;
-        case 'payment_intent.succeeded':
-            const paymentIntent = event.data.object;
-            status = 'payment_intent.succeeded';
-            console.log("paymentIntent");
-            return response.status(200).json({
-                success: true,
-                message: "paymentIntent"
-            })
-            break;
-        default:
-            console.log(`Unhandled event type ${event.type}`);
-            return response.status(400).json({
-                success: false,
-                message: `Unhandled event type ${event.type}`
-            });
+    if(event.type==='payment_intent.succeeded'){
+        console.log("entered the condition statement !!!");
+        paymentSuccess = event.data.object.status;
+        // paymentObject.forEach((payment=>{
+        //     console.log(payment.paymentId, "paymentId");
+        //     console.log(event.data.object.id, "paymentId");
+        //     if(payment.paymentId===event.data.object.id) {
+        //         console.log("matched id", payment.paymentId);
+        //         payment.payment=true;
+        //         console.log(payment.payment, "changed status");
+        //     }
+        // }));
+    }else{
+        response.status(400).json({
+            status:false
+        });
     }
-    // Return a 200 response to acknowledge receipt of the event
     response.status(200).json({
+        status: true,
+        message: 'webhook received'
+    });
+});
+
+// testing pending
+app.get('/statusCheck', express.json(), (req, res)=>{
+    res.status(200).json({
         success: true,
-        message: 'payment successfull'
+        paymentSuccess: paymentSuccess
     });
 });
 
